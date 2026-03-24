@@ -11,6 +11,7 @@
   <div class="card">
     <div class="card-body">
       <form action="/admin/teams/<%= team.id %>" method="POST">
+        <%- include('../partials/csrf') %>
         <div class="form-group">
           <label class="form-label">Teamname</label>
           <input type="text" name="name" class="form-control" value="<%= team.name %>" required>
@@ -41,6 +42,7 @@
       <% if (team.session_token) { %>
         <p class="mb-2">Aktive Sitzung auf: <strong><%= team.session_device || 'Unbekanntes Gerät' %></strong></p>
         <form action="/admin/teams/<%= team.id %>/reset-session" method="POST" data-confirm="Sitzung zurücksetzen?">
+        <%- include('../partials/csrf') %>
           <button type="submit" class="btn btn-warning">🔄 Sitzung zurücksetzen</button>
         </form>
       <% } else { %>
@@ -56,6 +58,7 @@
     <div class="card-body">
       <p class="mb-2 text-muted">Löscht das Team und alle zugehörigen Einreichungen.</p>
       <form action="/admin/teams/<%= team.id %>/delete" method="POST" data-confirm="Team '<%= team.name %>' wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.">
+        <%- include('../partials/csrf') %>
         <button type="submit" class="btn btn-danger">🗑️ Team löschen</button>
       </form>
     </div>

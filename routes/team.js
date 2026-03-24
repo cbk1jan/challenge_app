@@ -4,6 +4,20 @@ const express = require('express');
 const router = express.Router();
 const { db, getSetting, getLeaderboard, getTeamPoints, getTeamRank, getTasksWithStatus } = require('../db');
 
+// CSRF validation helper for multipart forms
+function validateCsrf(req, res) {
+  const token = req.body._csrf || req.headers['x-csrf-token'];
+  if (!req.session.csrfToken || token !== req.session.csrfToken) {
+    res.status(403).render('error', {
+      title: 'Ungültige Anfrage',
+      message: 'CSRF-Token ungültig. Bitte Seite neu laden.',
+      code: 403
+    });
+    return false;
+  }
+  return true;
+}
+
 // Team auth middleware
 function requireTeam(req, res, next) {
   if (!req.session.teamId) {
@@ -72,6 +86,7 @@ router.post('/tasks/:id/submit', (req, res) => {
   const upload = req.app.get('upload');
   upload.single('image')(req, res, (uploadErr) => {
     try {
+      if (!validateCsrf(req, res)) return;
       if (uploadErr) {
         return res.redirect(`/team/tasks/${req.params.id}?error=` + encodeURIComponent(uploadErr.message));
       }

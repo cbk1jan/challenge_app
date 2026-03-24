@@ -16,6 +16,7 @@
     </div>
     <div class="card-body">
       <form action="/admin/teams" method="POST" class="d-flex gap-2 flex-wrap align-center">
+        <%- include('partials/csrf') %>
         <input type="text" name="name" class="form-control" placeholder="Teamname" required style="max-width:220px">
         <input type="number" name="points_override" class="form-control" placeholder="Bonuspunkte" value="0" style="max-width:140px">
         <button type="submit" class="btn btn-primary">Team anlegen</button>

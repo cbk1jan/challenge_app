@@ -2,11 +2,13 @@
 
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
 const http = require('http');
 const { Server } = require('socket.io');
 const multer = require('multer');
+const rateLimit = require('express-rate-limit');
 
 // Ensure data and uploads dirs exist
 const dataDir = path.join(__dirname, 'data');
@@ -18,6 +20,11 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// Trust proxy if running behind reverse proxy (e.g. nginx in Docker)
+if (process.env.TRUST_PROXY === '1') {
+  app.set('trust proxy', 1);
+}
+
 // Session store
 const SQLiteStore = require('connect-sqlite3')(session);
 const sessionMiddleware = session({
@@ -28,7 +35,8 @@ const sessionMiddleware = session({
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production' && process.env.TRUST_PROXY === '1'
   }
 });
 
@@ -66,13 +74,44 @@ app.use('/uploads', express.static(uploadsDir));
 app.set('io', io);
 app.set('upload', upload);
 
-// Make session data available to templates
+// CSRF middleware: generate token per session, expose to templates
 app.use((req, res, next) => {
+  if (!req.session.csrfToken) {
+    req.session.csrfToken = crypto.randomBytes(32).toString('hex');
+  }
+  res.locals.csrfToken = req.session.csrfToken;
   res.locals.session = req.session;
   res.locals.isAdmin = !!(req.session && req.session.adminId);
   res.locals.isTeam = !!(req.session && req.session.teamId);
   next();
 });
+
+// CSRF validation for non-multipart POST/PUT/DELETE
+// Multipart routes validate CSRF after multer (token in form body)
+app.use((req, res, next) => {
+  if (!['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) return next();
+  const ct = req.headers['content-type'] || '';
+  if (ct.startsWith('multipart/')) return next(); // handled per-route after multer
+  const token = req.body._csrf || req.headers['x-csrf-token'];
+  if (!req.session.csrfToken || token !== req.session.csrfToken) {
+    return res.status(403).render('error', {
+      title: 'Ungültige Anfrage',
+      message: 'CSRF-Token ungültig. Bitte Seite neu laden und erneut versuchen.',
+      code: 403
+    });
+  }
+  next();
+});
+
+// Rate limiting on authentication endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Zu viele Anmeldeversuche. Bitte in 15 Minuten erneut versuchen.' }
+});
+app.use('/login', authLimiter);
 
 // Routes
 const authRoutes = require('./routes/auth');

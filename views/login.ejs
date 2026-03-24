@@ -26,6 +26,7 @@
 
     <div class="tab-pane <%= tab === 'team' ? 'active' : '' %>" id="tab-team">
       <form action="/login/team" method="POST">
+        <%- include('partials/csrf') %>
         <div class="form-group">
           <label class="form-label" for="join_code">Team-Code</label>
           <input type="text" id="join_code" name="join_code"
@@ -41,6 +42,7 @@
 
     <div class="tab-pane <%= tab === 'admin' ? 'active' : '' %>" id="tab-admin">
       <form action="/login/admin" method="POST">
+        <%- include('partials/csrf') %>
         <div class="form-group">
           <label class="form-label" for="username">Benutzername</label>
           <input type="text" id="username" name="username" class="form-control"

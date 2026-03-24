@@ -58,13 +58,16 @@
                   <div class="d-flex gap-1 flex-wrap">
                     <a href="/admin/tasks/<%= task.id %>/edit" class="btn btn-sm btn-outline">✏️</a>
                     <form action="/admin/tasks/<%= task.id %>/toggle" method="POST" style="display:inline">
+        <%- include('../partials/csrf') %>
                       <button type="submit" class="btn btn-sm btn-warning"><%= task.is_active ? '⏸️' : '▶️' %></button>
                     </form>
                     <form action="/admin/tasks/<%= task.id %>/duplicate" method="POST" style="display:inline">
+        <%- include('../partials/csrf') %>
                       <button type="submit" class="btn btn-sm btn-secondary">📋</button>
                     </form>
                     <form action="/admin/tasks/<%= task.id %>/delete" method="POST" style="display:inline"
                           data-confirm="Aufgabe '<%= task.title %>' wirklich löschen?">
+        <%- include('../partials/csrf') %>
                       <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
                     </form>
                   </div>

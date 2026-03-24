@@ -75,6 +75,7 @@
           <% } %>
 
           <form action="/admin/submissions/<%= s.id %>/review" method="POST" class="review-form mt-2">
+        <%- include('../partials/csrf') %>
             <select name="status" class="form-control" style="max-width:150px">
               <option value="in_review" <%= s.status === 'in_review' ? 'selected' : '' %>>In Prüfung</option>
               <option value="correct"   <%= s.status === 'correct'   ? 'selected' : '' %>>Korrekt</option>

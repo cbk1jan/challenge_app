@@ -8,6 +8,7 @@
   <% if (error) { %><div class="alert alert-danger">⚠️ <%= error %></div><% } %>
 
   <form action="<%= task ? '/admin/tasks/' + task.id : '/admin/tasks' %>" method="POST" enctype="multipart/form-data">
+        <%- include('../partials/csrf') %>
     <div class="card">
       <div class="card-header"><h3>Grunddaten</h3></div>
       <div class="card-body">
