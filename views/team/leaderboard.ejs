@@ -1,0 +1,53 @@
+<%- include('../partials/header') %>
+<div class="container">
+  <div class="page-header">
+    <h1>🏆 Rangliste</h1>
+    <span><span class="live-dot"></span>Live</span>
+  </div>
+
+  <div class="card">
+    <div class="card-body" style="text-align:center;padding-bottom:0.5rem">
+      <div class="text-muted" style="font-size:0.85rem"><%= eventName %></div>
+    </div>
+    <% if (leaderboard.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-icon">🏆</div>
+        <p>Noch keine Punkte</p>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Platz</th>
+              <th>Team</th>
+              <th>Punkte</th>
+              <th>Gelöst</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-tbody">
+            <% leaderboard.forEach(function(t, i) { %>
+              <tr style="<%= t.id === team.id ? 'background:#eff6ff;font-weight:700' : '' %>">
+                <td>
+                  <% if (i === 0) { %><span class="rank-badge rank-1">🥇</span>
+                  <% } else if (i === 1) { %><span class="rank-badge rank-2">🥈</span>
+                  <% } else if (i === 2) { %><span class="rank-badge rank-3">🥉</span>
+                  <% } else { %><span class="rank-badge rank-other"><%= i+1 %></span><% } %>
+                </td>
+                <td>
+                  <%= t.name %>
+                  <% if (t.id === team.id) { %><span class="badge badge-info" style="margin-left:4px">Du</span><% } %>
+                </td>
+                <td><strong><%= t.total_points %></strong></td>
+                <td><%= t.solved_count %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <a href="/team/dashboard" class="btn btn-outline">← Zurück zu den Aufgaben</a>
+</div>
+<%- include('../partials/footer') %>

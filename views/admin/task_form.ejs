@@ -1,0 +1,165 @@
+<%- include('../partials/header') %>
+<div class="container">
+  <div class="page-header">
+    <h1><%= task ? '✏️ Aufgabe bearbeiten' : '➕ Neue Aufgabe' %></h1>
+    <a href="/admin/tasks" class="btn btn-outline">← Zurück</a>
+  </div>
+
+  <% if (error) { %><div class="alert alert-danger">⚠️ <%= error %></div><% } %>
+
+  <form action="<%= task ? '/admin/tasks/' + task.id : '/admin/tasks' %>" method="POST" enctype="multipart/form-data">
+    <div class="card">
+      <div class="card-header"><h3>Grunddaten</h3></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Titel *</label>
+          <input type="text" name="title" class="form-control"
+            value="<%= task ? task.title : '' %>" required placeholder="Aufgabentitel">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Beschreibung</label>
+          <textarea name="description" class="form-control" rows="4"
+            placeholder="Aufgabenbeschreibung..."><%= task ? task.description : '' %></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Punkte</label>
+            <input type="number" name="points" class="form-control"
+              value="<%= task ? task.points : 10 %>" min="0" max="9999">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reihenfolge</label>
+            <input type="number" name="sort_order" class="form-control"
+              value="<%= task ? task.sort_order : 0 %>" min="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Aktiv</label>
+            <select name="is_active" class="form-control">
+              <option value="1" <%= (!task || task.is_active) ? 'selected' : '' %>>Ja</option>
+              <option value="0" <%= (task && !task.is_active) ? 'selected' : '' %>>Nein</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Freischaltcode (optional)</label>
+            <input type="text" name="unlock_code" class="form-control"
+              value="<%= task ? (task.unlock_code || '') : '' %>"
+              placeholder="z.B. GEHEIMWORT"
+              autocapitalize="characters">
+            <div class="form-hint">Teams müssen diesen Code kennen</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Bild (optional)</h3></div>
+      <div class="card-body">
+        <% if (task && task.image_path) { %>
+          <img src="<%= task.image_path %>" class="task-image" style="max-height:150px;margin-bottom:0.75rem">
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:0.5rem">
+              <input type="checkbox" name="remove_image" value="1"> Bild entfernen
+            </label>
+          </div>
+        <% } %>
+        <div class="form-group">
+          <label class="form-label">Bild hochladen</label>
+          <input type="file" name="image" class="form-control" accept="image/*" data-preview="img-preview">
+          <img id="img-preview" class="img-preview">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Antwort-Einstellungen</h3></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Antworttyp</label>
+          <select name="answer_type" id="answer_type" class="form-control">
+            <option value="text"            <%= (!task || task.answer_type === 'text') ? 'selected' : '' %>>Text</option>
+            <option value="multiple_choice" <%= (task && task.answer_type === 'multiple_choice') ? 'selected' : '' %>>Multiple Choice</option>
+            <option value="image"           <%= (task && task.answer_type === 'image') ? 'selected' : '' %>>Nur Bild-Upload</option>
+            <option value="image_text"      <%= (task && task.answer_type === 'image_text') ? 'selected' : '' %>>Bild + Text</option>
+          </select>
+        </div>
+
+        <div id="mc-options-section" style="display:none">
+          <label class="form-label">Antwortoptionen</label>
+          <div id="options-container">
+            <% options.forEach(function(opt, i) { %>
+              <div class="option-row">
+                <input type="text" name="option_text" class="form-control"
+                  value="<%= opt.option_text %>" placeholder="Option <%= i+1 %>">
+                <label style="display:flex;align-items:center;gap:4px;white-space:nowrap">
+                  <input type="checkbox" name="option_correct" value="<%= i %>"
+                    <%= opt.is_correct ? 'checked' : '' %>> Korrekt
+                </label>
+                <button type="button" class="btn btn-sm btn-danger remove-option">✕</button>
+              </div>
+            <% }); %>
+          </div>
+          <button type="button" id="add-option-btn" class="btn btn-sm btn-outline mt-1">+ Option hinzufügen</button>
+        </div>
+
+        <div class="form-group mt-2">
+          <label class="form-label">Korrekte Antwort (für Auto-Check)</label>
+          <input type="text" name="correct_answer" class="form-control"
+            value="<%= task ? (task.correct_answer || '') : '' %>"
+            placeholder="Erwartete Antwort (Groß-/Kleinschreibung egal)">
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:0.5rem">
+            <input type="checkbox" name="auto_check" value="1"
+              <%= (task && task.auto_check) ? 'checked' : '' %>>
+            <span class="form-label" style="margin:0">Automatisch prüfen</span>
+          </label>
+          <div class="form-hint">Bei Text/MC-Aufgaben die Antwort automatisch vergleichen</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>Hinweise</h3>
+        <button type="button" id="add-hint-btn" class="btn btn-sm btn-outline">+ Hinweis</button>
+      </div>
+      <div class="card-body">
+        <div class="form-hint mb-2">Jeder Hinweis kostet Punkte. Kostenpunkte werden von der Maximalwertung abgezogen.</div>
+        <div id="hints-editor"></div>
+        <input type="hidden" name="hints_json" id="hints_json"
+          value="<%= task ? task.hints : '[]' %>">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Kartenposition (optional)</h3></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Breitengrad (Lat)</label>
+            <input type="number" name="map_lat" class="form-control" step="any"
+              value="<%= task && task.map_lat ? task.map_lat : '' %>" placeholder="z.B. 48.1374">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Längengrad (Lng)</label>
+            <input type="number" name="map_lng" class="form-control" step="any"
+              value="<%= task && task.map_lng ? task.map_lng : '' %>" placeholder="z.B. 11.5755">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Radius (Meter)</label>
+          <input type="number" name="map_radius" class="form-control" style="max-width:150px"
+            value="<%= task && task.map_radius ? task.map_radius : '' %>" placeholder="z.B. 100">
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary btn-lg"><%= task ? 'Speichern' : 'Aufgabe erstellen' %></button>
+      <a href="/admin/tasks" class="btn btn-outline btn-lg">Abbrechen</a>
+    </div>
+  </form>
+</div>
+<%- include('../partials/footer') %>

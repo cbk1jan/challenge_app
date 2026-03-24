@@ -1,0 +1,64 @@
+<%- include('../partials/header') %>
+<div class="container">
+  <div class="page-header">
+    <h1>✏️ Team bearbeiten</h1>
+    <a href="/admin/teams" class="btn btn-outline">← Zurück</a>
+  </div>
+
+  <% if (error) { %><div class="alert alert-danger">⚠️ <%= error %></div><% } %>
+  <% if (success) { %><div class="alert alert-success">✅ <%= success %></div><% } %>
+
+  <div class="card">
+    <div class="card-body">
+      <form action="/admin/teams/<%= team.id %>" method="POST">
+        <div class="form-group">
+          <label class="form-label">Teamname</label>
+          <input type="text" name="name" class="form-control" value="<%= team.name %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Beitrittscode</label>
+          <div class="join-code" style="padding:0.5rem;background:#f1f5f9;border-radius:8px;display:inline-block"><%= team.join_code %></div>
+          <div class="form-hint">Der Code kann nicht geändert werden</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bonuspunkte (manuell)</label>
+          <input type="number" name="points_override" class="form-control" value="<%= team.points_override %>" style="max-width:150px">
+          <div class="form-hint">Werden direkt zur Punktzahl addiert</div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Speichern</button>
+          <a href="/admin/teams" class="btn btn-outline">Abbrechen</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Geräte-Sitzung</h3>
+    </div>
+    <div class="card-body">
+      <% if (team.session_token) { %>
+        <p class="mb-2">Aktive Sitzung auf: <strong><%= team.session_device || 'Unbekanntes Gerät' %></strong></p>
+        <form action="/admin/teams/<%= team.id %>/reset-session" method="POST" data-confirm="Sitzung zurücksetzen?">
+          <button type="submit" class="btn btn-warning">🔄 Sitzung zurücksetzen</button>
+        </form>
+      <% } else { %>
+        <p class="text-muted">Keine aktive Sitzung</p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Team löschen</h3>
+    </div>
+    <div class="card-body">
+      <p class="mb-2 text-muted">Löscht das Team und alle zugehörigen Einreichungen.</p>
+      <form action="/admin/teams/<%= team.id %>/delete" method="POST" data-confirm="Team '<%= team.name %>' wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.">
+        <button type="submit" class="btn btn-danger">🗑️ Team löschen</button>
+      </form>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

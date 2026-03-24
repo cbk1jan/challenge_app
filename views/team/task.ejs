@@ -1,0 +1,129 @@
+<%- include('../partials/header') %>
+<div class="container">
+  <div class="page-header">
+    <h1><%= task.title %></h1>
+    <a href="/team/dashboard" class="btn btn-outline">← Zurück</a>
+  </div>
+
+  <% if (error) { %><div class="alert alert-danger">⚠️ <%= decodeURIComponent(error) %></div><% } %>
+  <% if (success) { %><div class="alert alert-success">✅ <%= decodeURIComponent(success) %></div><% } %>
+
+  <!-- Task detail card -->
+  <div class="card">
+    <div class="card-body">
+      <% if (task.image_path) { %>
+        <img src="<%= task.image_path %>" class="task-image" alt="<%= task.title %>">
+      <% } %>
+      <% if (task.description) { %>
+        <p style="white-space:pre-wrap;margin-bottom:1rem"><%= task.description %></p>
+      <% } %>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="badge badge-secondary"><%= task.points %> Punkte max.</span>
+        <% if (task.unlock_code) { %>
+          <span class="badge badge-info">🔒 Freischaltcode erforderlich</span>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hints -->
+  <% if (hints.length > 0) { %>
+    <div class="card">
+      <div class="card-header"><h3>💡 Hinweise</h3></div>
+      <div class="card-body">
+        <ul class="hints-list">
+          <% hints.forEach(function(hint, i) { %>
+            <% const used = usedHints.some(function(h) { return h.hint_index === i; }); %>
+            <li class="hint-item">
+              <% if (used) { %>
+                <span class="hint-text">💡 <%= hint.text %></span>
+                <span class="hint-cost">–<%= hint.cost %> Pkt.</span>
+              <% } else { %>
+                <span class="hint-text text-muted">Hinweis <%= i+1 %> (kostet <%= hint.cost %> Punkte)</span>
+                <form action="/team/tasks/<%= task.id %>/hint/<%= i %>" method="POST"
+                      data-confirm="Hinweis <%= i+1 %> freischalten? Das kostet <%= hint.cost %> Punkte.">
+                  <button type="submit" class="btn btn-sm btn-warning">Freischalten</button>
+                </form>
+              <% } %>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Current submission -->
+  <% if (submission && submission.status === 'correct') { %>
+    <div class="alert alert-success">
+      ✅ <strong>Korrekt beantwortet!</strong> Du hast <%= submission.points_awarded %> Punkte erhalten.
+    </div>
+  <% } else { %>
+    <!-- Submit form -->
+    <div class="card">
+      <div class="card-header"><h3>✏️ Antwort einreichen</h3></div>
+      <div class="card-body">
+        <% if (submission) { %>
+          <div class="alert alert-info mb-2">
+            Du hast bereits eine Antwort eingereicht (Status:
+            <% if (submission.status === 'wrong') { %>❌ Falsch<% } else if (submission.status === 'in_review') { %>🔍 In Prüfung<% } else { %>⏳ Ausstehend<% } %>).
+            Du kannst sie erneut einreichen.
+          </div>
+        <% } %>
+
+        <form action="/team/tasks/<%= task.id %>/submit" method="POST" enctype="multipart/form-data">
+          <% if (task.unlock_code) { %>
+            <div class="form-group">
+              <label class="form-label">Freischaltcode</label>
+              <input type="text" name="unlock_code" class="form-control"
+                placeholder="Code eingeben..." autocapitalize="characters" required>
+            </div>
+          <% } %>
+
+          <% if (task.answer_type === 'text' || task.answer_type === 'image_text') { %>
+            <div class="form-group">
+              <label class="form-label">Deine Antwort</label>
+              <input type="text" name="answer_text" class="form-control"
+                placeholder="Antwort eingeben..."
+                value="<%= submission ? (submission.answer_text || '') : '' %>"
+                <%= task.answer_type === 'text' ? 'required' : '' %>>
+            </div>
+          <% } %>
+
+          <% if (task.answer_type === 'multiple_choice') { %>
+            <div class="form-group">
+              <label class="form-label">Wähle die richtige Antwort</label>
+              <% options.forEach(function(opt) { %>
+                <label style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border:1px solid var(--border);border-radius:8px;margin-bottom:0.5rem;cursor:pointer">
+                  <input type="radio" name="answer_text" value="<%= opt.id %>"
+                    <%= submission && submission.answer_text == opt.id ? 'checked' : '' %> required>
+                  <%= opt.option_text %>
+                </label>
+              <% }); %>
+            </div>
+          <% } %>
+
+          <% if (task.answer_type === 'image' || task.answer_type === 'image_text') { %>
+            <div class="form-group">
+              <label class="form-label">Foto hochladen</label>
+              <input type="file" name="image" class="form-control" accept="image/*"
+                data-preview="submit-preview"
+                <%= task.answer_type === 'image' ? 'required' : '' %>>
+              <img id="submit-preview" class="img-preview">
+              <% if (submission && submission.image_path) { %>
+                <div class="mt-1">
+                  <div class="form-hint">Aktuell hochgeladenes Bild:</div>
+                  <img src="<%= submission.image_path %>" class="submission-image">
+                </div>
+              <% } %>
+            </div>
+          <% } %>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block">
+            Antwort einreichen
+          </button>
+        </form>
+      </div>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

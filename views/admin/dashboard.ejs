@@ -1,0 +1,88 @@
+<%- include('../partials/header') %>
+<div class="container-wide">
+  <div class="page-header">
+    <h1>📊 Dashboard</h1>
+    <span class="text-muted"><%= eventName %></span>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value"><%= teamCount %></div>
+      <div class="stat-label">Teams</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value"><%= taskCount %></div>
+      <div class="stat-label">Aufgaben</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value"><%= submissionCount %></div>
+      <div class="stat-label">Einreichungen</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:<%= pendingCount > 0 ? 'var(--warning)' : 'var(--success)' %>"><%= pendingCount %></div>
+      <div class="stat-label">Zu prüfen</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Letzte Einreichungen</h2>
+      <a href="/admin/submissions" class="btn btn-outline btn-sm">Alle ansehen</a>
+    </div>
+    <% if (recentSubmissions.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>Noch keine Einreichungen</p>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>Aufgabe</th>
+              <th>Status</th>
+              <th>Punkte</th>
+              <th>Eingereicht</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% recentSubmissions.forEach(function(s) { %>
+              <tr>
+                <td><strong><%= s.team_name %></strong></td>
+                <td class="truncate"><%= s.task_title %></td>
+                <td>
+                  <% if (s.status === 'correct') { %>
+                    <span class="badge badge-success">Korrekt</span>
+                  <% } else if (s.status === 'wrong') { %>
+                    <span class="badge badge-danger">Falsch</span>
+                  <% } else if (s.status === 'in_review') { %>
+                    <span class="badge badge-info">In Prüfung</span>
+                  <% } else { %>
+                    <span class="badge badge-warning">Ausstehend</span>
+                  <% } %>
+                </td>
+                <td><%= s.points_awarded %></td>
+                <td class="text-muted" style="font-size:0.8rem"><%= s.submitted_at %></td>
+                <td>
+                  <% if (s.status === 'pending' || s.status === 'in_review') { %>
+                    <a href="/admin/submissions?task_id=<%= s.task_id %>" class="btn btn-sm btn-primary">Prüfen</a>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="/admin/teams" class="btn btn-primary">👥 Teams verwalten</a>
+    <a href="/admin/tasks" class="btn btn-primary">📋 Aufgaben verwalten</a>
+    <a href="/admin/leaderboard" class="btn btn-outline">🏆 Rangliste</a>
+    <a href="/admin/export" class="btn btn-outline">⬇️ CSV Export</a>
+  </div>
+</div>
+<%- include('../partials/footer') %>

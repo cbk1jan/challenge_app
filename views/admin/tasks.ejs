@@ -1,0 +1,80 @@
+<%- include('../partials/header') %>
+<div class="container-wide">
+  <div class="page-header">
+    <h1>📋 Aufgaben</h1>
+    <a href="/admin/tasks/new" class="btn btn-primary">+ Neue Aufgabe</a>
+  </div>
+
+  <% if (success) { %><div class="alert alert-success">✅ <%= success %></div><% } %>
+  <% if (error) { %><div class="alert alert-danger">⚠️ <%= error %></div><% } %>
+
+  <% if (tasks.length === 0) { %>
+    <div class="card">
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>Noch keine Aufgaben angelegt</p>
+        <a href="/admin/tasks/new" class="btn btn-primary mt-2">Erste Aufgabe erstellen</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="card">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Nr.</th>
+              <th>Titel</th>
+              <th>Typ</th>
+              <th>Punkte</th>
+              <th>Auto</th>
+              <th>Status</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% tasks.forEach(function(task, i) { %>
+              <tr>
+                <td class="text-muted"><%= task.sort_order || i+1 %></td>
+                <td>
+                  <strong><%= task.title %></strong>
+                  <% if (task.unlock_code) { %>
+                    <span class="badge badge-info" style="margin-left:4px">🔒 Code</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% const typeMap = {text:'Text',multiple_choice:'MC',image:'Bild',image_text:'Bild+Text'}; %>
+                  <span class="badge badge-secondary"><%= typeMap[task.answer_type] || task.answer_type %></span>
+                </td>
+                <td><strong><%= task.points %></strong></td>
+                <td>
+                  <% if (task.auto_check) { %><span class="badge badge-success">Auto</span>
+                  <% } else { %><span class="badge badge-secondary">Manuell</span><% } %>
+                </td>
+                <td>
+                  <% if (task.is_active) { %><span class="badge badge-success">Aktiv</span>
+                  <% } else { %><span class="badge badge-secondary">Inaktiv</span><% } %>
+                </td>
+                <td>
+                  <div class="d-flex gap-1 flex-wrap">
+                    <a href="/admin/tasks/<%= task.id %>/edit" class="btn btn-sm btn-outline">✏️</a>
+                    <form action="/admin/tasks/<%= task.id %>/toggle" method="POST" style="display:inline">
+                      <button type="submit" class="btn btn-sm btn-warning"><%= task.is_active ? '⏸️' : '▶️' %></button>
+                    </form>
+                    <form action="/admin/tasks/<%= task.id %>/duplicate" method="POST" style="display:inline">
+                      <button type="submit" class="btn btn-sm btn-secondary">📋</button>
+                    </form>
+                    <form action="/admin/tasks/<%= task.id %>/delete" method="POST" style="display:inline"
+                          data-confirm="Aufgabe '<%= task.title %>' wirklich löschen?">
+                      <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

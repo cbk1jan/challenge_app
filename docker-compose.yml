@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  app:
+    image: challenge-app:latest
+    build: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - PORT=3000
+      - SESSION_SECRET=${SESSION_SECRET:-changeme-use-strong-secret}
+      - NODE_ENV=production
+    volumes:
+      - challenge_data:/app/data
+      - challenge_uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+volumes:
+  challenge_data:
+  challenge_uploads:

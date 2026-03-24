@@ -1,0 +1,92 @@
+<%- include('../partials/header') %>
+<div class="container-wide">
+  <div class="page-header">
+    <h1>📨 Einreichungen</h1>
+    <a href="/admin/export" class="btn btn-outline btn-sm">⬇️ CSV Export</a>
+  </div>
+
+  <% if (success) { %><div class="alert alert-success">✅ <%= success %></div><% } %>
+  <% if (error) { %><div class="alert alert-danger">⚠️ <%= error %></div><% } %>
+
+  <!-- Filter -->
+  <div class="card">
+    <div class="card-body">
+      <form action="/admin/submissions" method="GET" class="d-flex gap-2 flex-wrap align-center">
+        <select name="status" class="form-control" style="max-width:160px">
+          <option value="">Alle Status</option>
+          <option value="pending"   <%= filter.status === 'pending'   ? 'selected' : '' %>>Ausstehend</option>
+          <option value="in_review" <%= filter.status === 'in_review' ? 'selected' : '' %>>In Prüfung</option>
+          <option value="correct"   <%= filter.status === 'correct'   ? 'selected' : '' %>>Korrekt</option>
+          <option value="wrong"     <%= filter.status === 'wrong'     ? 'selected' : '' %>>Falsch</option>
+        </select>
+        <select name="team_id" class="form-control" style="max-width:200px">
+          <option value="">Alle Teams</option>
+          <% teams.forEach(function(t) { %>
+            <option value="<%= t.id %>" <%= filter.team_id == t.id ? 'selected' : '' %>><%= t.name %></option>
+          <% }); %>
+        </select>
+        <select name="task_id" class="form-control" style="max-width:220px">
+          <option value="">Alle Aufgaben</option>
+          <% tasks.forEach(function(t) { %>
+            <option value="<%= t.id %>" <%= filter.task_id == t.id ? 'selected' : '' %>><%= t.title %></option>
+          <% }); %>
+        </select>
+        <button type="submit" class="btn btn-primary">Filtern</button>
+        <a href="/admin/submissions" class="btn btn-outline">Zurücksetzen</a>
+      </form>
+    </div>
+  </div>
+
+  <% if (submissions.length === 0) { %>
+    <div class="card">
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>Keine Einreichungen gefunden</p>
+      </div>
+    </div>
+  <% } else { %>
+    <% submissions.forEach(function(s) { %>
+      <div class="card" id="sub-<%= s.id %>">
+        <div class="card-header">
+          <div>
+            <strong><%= s.team_name %></strong>
+            <span class="text-muted"> – </span>
+            <span><%= s.task_title %></span>
+          </div>
+          <div class="d-flex gap-1 align-center">
+            <% if (s.status === 'correct') { %>
+              <span class="badge badge-success">✅ Korrekt (<%= s.points_awarded %> Pkt.)</span>
+            <% } else if (s.status === 'wrong') { %>
+              <span class="badge badge-danger">❌ Falsch</span>
+            <% } else if (s.status === 'in_review') { %>
+              <span class="badge badge-info">🔍 In Prüfung</span>
+            <% } else { %>
+              <span class="badge badge-warning">⏳ Ausstehend</span>
+            <% } %>
+            <span class="text-muted" style="font-size:0.8rem"><%= s.submitted_at %></span>
+          </div>
+        </div>
+        <div class="card-body">
+          <% if (s.answer_text) { %>
+            <p class="mb-2"><strong>Antwort:</strong> <%= s.answer_text %></p>
+          <% } %>
+          <% if (s.image_path) { %>
+            <img src="<%= s.image_path %>" class="submission-image" alt="Eingereichten Bild">
+          <% } %>
+
+          <form action="/admin/submissions/<%= s.id %>/review" method="POST" class="review-form mt-2">
+            <select name="status" class="form-control" style="max-width:150px">
+              <option value="in_review" <%= s.status === 'in_review' ? 'selected' : '' %>>In Prüfung</option>
+              <option value="correct"   <%= s.status === 'correct'   ? 'selected' : '' %>>Korrekt</option>
+              <option value="wrong"     <%= s.status === 'wrong'     ? 'selected' : '' %>>Falsch</option>
+            </select>
+            <input type="number" name="points_awarded" value="<%= s.points_awarded %>"
+              placeholder="Punkte" min="0" max="9999">
+            <button type="submit" class="btn btn-primary btn-sm">Bewerten</button>
+          </form>
+        </div>
+      </div>
+    <% }); %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>
