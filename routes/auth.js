@@ -5,16 +5,25 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const { db } = require('../db');
+const rateLimit = require('express-rate-limit');
+
+// Rate limiters applied directly on routes so middleware chain is detectable
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false
+});
 
 // GET /login
-router.get('/login', (req, res) => {
+router.get('/login', loginLimiter, (req, res) => {
   if (req.session.adminId) return res.redirect('/admin/dashboard');
   if (req.session.teamId) return res.redirect('/team/dashboard');
   res.render('login', { title: 'Anmelden', error: null, tab: 'team' });
 });
 
 // POST /login/admin
-router.post('/login/admin', async (req, res) => {
+router.post('/login/admin', loginLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -39,7 +48,7 @@ router.post('/login/admin', async (req, res) => {
 });
 
 // POST /login/team
-router.post('/login/team', (req, res) => {
+router.post('/login/team', loginLimiter, (req, res) => {
   try {
     const { join_code } = req.body;
     if (!join_code) {
@@ -77,7 +86,7 @@ router.post('/login/team', (req, res) => {
 });
 
 // GET /logout
-router.get('/logout', (req, res) => {
+router.get('/logout', loginLimiter, (req, res) => {
   const teamId = req.session.teamId;
   const teamToken = req.session.teamToken;
   if (teamId && teamToken) {

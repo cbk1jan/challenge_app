@@ -3,6 +3,17 @@
 const express = require('express');
 const router = express.Router();
 const { db, getSetting, getLeaderboard, getTeamPoints, getTeamRank, getTasksWithStatus } = require('../db');
+const rateLimit = require('express-rate-limit');
+
+// General rate limiter for authenticated team routes
+const teamLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+router.use(teamLimiter);
 
 // CSRF validation helper for multipart forms
 function validateCsrf(req, res) {

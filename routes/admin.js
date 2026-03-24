@@ -4,6 +4,17 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const { db, getSetting, setSetting, getLeaderboard, generateJoinCode } = require('../db');
+const rateLimit = require('express-rate-limit');
+
+// General rate limiter for authenticated admin routes
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 500,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+router.use(adminLimiter);
 
 // CSRF validation helper for multipart forms (body available after multer)
 function validateCsrf(req, res) {
