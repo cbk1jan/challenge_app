@@ -1,8 +1,7 @@
 version: '3.8'
 services:
   app:
-    image: challenge-app:latest
-    build: .
+    image: ghcr.io/cbk1jan/challenge_app:latest
     ports:
       - "${PORT:-3000}:3000"
     environment:
