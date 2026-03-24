@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> – Schnitzeljagd</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="navbar-brand">🏁 Schnitzeljagd</a>
+  <button class="navbar-toggle" id="navbar-toggle" aria-label="Menü">☰</button>
+  <ul class="navbar-nav" id="navbar-nav">
+    <% if (isAdmin) { %>
+      <li><a href="/admin/dashboard">Dashboard</a></li>
+      <li><a href="/admin/teams">Teams</a></li>
+      <li><a href="/admin/tasks">Aufgaben</a></li>
+      <li><a href="/admin/submissions">Einreichungen</a></li>
+      <li><a href="/admin/leaderboard">Rangliste</a></li>
+      <li><a href="/admin/settings">Einstellungen</a></li>
+      <li><a href="/logout">Abmelden</a></li>
+    <% } else if (isTeam) { %>
+      <li><a href="/team/dashboard">Aufgaben</a></li>
+      <li><a href="/team/leaderboard">Rangliste</a></li>
+      <li><a href="/logout">Abmelden</a></li>
+    <% } else { %>
+      <li><a href="/login">Anmelden</a></li>
+    <% } %>
+  </ul>
+</nav>
+
+<div id="submission-notify" style="display:none;position:fixed;bottom:1rem;right:1rem;background:#1e293b;color:#fff;padding:0.75rem 1.25rem;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:999;font-size:0.9rem;max-width:320px"></div>
+
+<%- body %>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

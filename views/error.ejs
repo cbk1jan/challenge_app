@@ -1,0 +1,8 @@
+<%- include('partials/header') %>
+<div class="container" style="text-align:center;padding-top:4rem">
+  <div style="font-size:4rem;margin-bottom:1rem"><%= code === 404 ? '🔍' : '⚠️' %></div>
+  <h1 style="font-size:2rem;margin-bottom:0.5rem"><%= title %></h1>
+  <p class="text-muted" style="margin-bottom:2rem"><%= message %></p>
+  <a href="/" class="btn btn-primary">Zur Startseite</a>
+</div>
+<%- include('partials/footer') %>

@@ -1,0 +1,65 @@
+<%- include('../partials/header') %>
+<div class="container">
+  <div class="page-header">
+    <h1>⚙️ Einstellungen</h1>
+  </div>
+
+  <% if (success) { %><div class="alert alert-success">✅ <%= success %></div><% } %>
+  <% if (error) { %><div class="alert alert-danger">⚠️ <%= error %></div><% } %>
+
+  <div class="card">
+    <div class="card-header"><h3>Event-Einstellungen</h3></div>
+    <div class="card-body">
+      <form action="/admin/settings" method="POST">
+        <%- include('partials/csrf') %>
+        <div class="form-group">
+          <label class="form-label">Event-Name</label>
+          <input type="text" name="event_name" class="form-control"
+            value="<%= eventName %>" placeholder="Schnitzeljagd Event">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Event aktiv</label>
+          <select name="event_active" class="form-control" style="max-width:200px">
+            <option value="1" <%= eventActive === '1' ? 'selected' : '' %>>Ja – Teams können spielen</option>
+            <option value="0" <%= eventActive !== '1' ? 'selected' : '' %>>Nein – Event pausiert</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Speichern</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Admin-Passwort ändern</h3></div>
+    <div class="card-body">
+      <form action="/admin/password" method="POST">
+        <%- include('partials/csrf') %>
+        <div class="form-group">
+          <label class="form-label">Aktuelles Passwort</label>
+          <input type="password" name="current_password" class="form-control"
+            autocomplete="current-password" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Neues Passwort</label>
+          <input type="password" name="new_password" class="form-control"
+            autocomplete="new-password" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Neues Passwort bestätigen</label>
+          <input type="password" name="confirm_password" class="form-control"
+            autocomplete="new-password" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary">Passwort ändern</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Daten-Export</h3></div>
+    <div class="card-body">
+      <p class="mb-2 text-muted">Exportiere alle Einreichungen als CSV-Datei (UTF-8 mit BOM für Excel).</p>
+      <a href="/admin/export" class="btn btn-outline">⬇️ CSV herunterladen</a>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

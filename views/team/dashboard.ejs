@@ -1,0 +1,80 @@
+<%- include('../partials/header') %>
+<div class="container">
+  <div class="page-header">
+    <h1>🗺️ <%= eventName %></h1>
+    <div class="text-muted">
+      <strong><%= session.teamName %></strong> &bull;
+      <strong><%= totalPoints %> Punkte</strong>
+      <% if (rank) { %> &bull; Platz <%= rank %> von <%= totalTeams %><% } %>
+    </div>
+  </div>
+
+  <% if (eventActive !== '1') { %>
+    <div class="alert alert-warning">⏸️ Das Event ist derzeit pausiert. Warte auf den Start.</div>
+  <% } %>
+
+  <% const solved = tasks.filter(t => t.submission && t.submission.status === 'correct').length; %>
+  <% const total = tasks.filter(t => t.is_active).length; %>
+  <div class="card mb-2">
+    <div class="card-body" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+      <div>
+        <div class="stat-value" style="font-size:1.5rem"><%= totalPoints %></div>
+        <div class="stat-label">Punkte gesamt</div>
+      </div>
+      <div>
+        <div class="stat-value" style="font-size:1.5rem;color:var(--success)"><%= solved %>/<%= total %></div>
+        <div class="stat-label">Aufgaben gelöst</div>
+      </div>
+      <% if (rank) { %>
+      <div>
+        <div class="stat-value" style="font-size:1.5rem;color:var(--warning)">#<%= rank %></div>
+        <div class="stat-label">Aktueller Rang</div>
+      </div>
+      <% } %>
+      <a href="/team/leaderboard" class="btn btn-outline btn-sm" style="margin-left:auto">🏆 Rangliste</a>
+    </div>
+  </div>
+
+  <% const activeTasks = tasks.filter(t => t.is_active); %>
+  <% if (activeTasks.length === 0) { %>
+    <div class="card">
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>Noch keine Aufgaben verfügbar</p>
+      </div>
+    </div>
+  <% } else { %>
+    <ul class="task-list">
+      <% activeTasks.forEach(function(task) { %>
+        <% const sub = task.submission; %>
+        <% const statusClass = sub ? 'status-' + sub.status : ''; %>
+        <li class="task-item <%= statusClass %>">
+          <a href="/team/tasks/<%= task.id %>">
+            <div>
+              <div class="task-title"><%= task.title %></div>
+              <div class="task-pts"><%= task.points %> Punkte
+                <% if (task.usedHints && task.usedHints.length > 0) { %>
+                  &bull; <%= task.usedHints.length %> Hinweis(e) genutzt
+                <% } %>
+              </div>
+            </div>
+            <div>
+              <% if (!sub) { %>
+                <span class="badge badge-secondary">Offen</span>
+              <% } else if (sub.status === 'correct') { %>
+                <span class="badge badge-success">✅ Korrekt</span>
+              <% } else if (sub.status === 'wrong') { %>
+                <span class="badge badge-danger">❌ Falsch</span>
+              <% } else if (sub.status === 'in_review') { %>
+                <span class="badge badge-info">🔍 In Prüfung</span>
+              <% } else { %>
+                <span class="badge badge-warning">⏳ Eingereicht</span>
+              <% } %>
+            </div>
+          </a>
+        </li>
+      <% }); %>
+    </ul>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

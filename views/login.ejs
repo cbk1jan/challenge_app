@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anmelden – Schnitzeljagd</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem">🏁</div>
+      <h1>Schnitzeljagd</h1>
+      <p>Bitte anmelden um fortzufahren</p>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-danger">⚠️ <%= error %></div>
+    <% } %>
+
+    <div class="tabs">
+      <button class="tab-btn <%= tab === 'team' ? 'active' : '' %>" data-tab="team">Team</button>
+      <button class="tab-btn <%= tab === 'admin' ? 'active' : '' %>" data-tab="admin">Admin</button>
+    </div>
+
+    <div class="tab-pane <%= tab === 'team' ? 'active' : '' %>" id="tab-team">
+      <form action="/login/team" method="POST">
+        <%- include('partials/csrf') %>
+        <div class="form-group">
+          <label class="form-label" for="join_code">Team-Code</label>
+          <input type="text" id="join_code" name="join_code"
+            class="form-control" placeholder="z.B. ABC123"
+            autocomplete="off" autocapitalize="characters"
+            maxlength="6" style="font-size:1.3rem;letter-spacing:0.15em;text-align:center;text-transform:uppercase"
+            required>
+          <div class="form-hint">Gib deinen 6-stelligen Team-Code ein</div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Beitreten</button>
+      </form>
+    </div>
+
+    <div class="tab-pane <%= tab === 'admin' ? 'active' : '' %>" id="tab-admin">
+      <form action="/login/admin" method="POST">
+        <%- include('partials/csrf') %>
+        <div class="form-group">
+          <label class="form-label" for="username">Benutzername</label>
+          <input type="text" id="username" name="username" class="form-control"
+            placeholder="admin" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Passwort</label>
+          <input type="password" id="password" name="password" class="form-control"
+            placeholder="••••••••" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Anmelden</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

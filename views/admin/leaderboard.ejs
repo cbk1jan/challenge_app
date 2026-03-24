@@ -1,0 +1,45 @@
+<%- include('../partials/header') %>
+<div class="container">
+  <div class="page-header">
+    <h1>🏆 Rangliste</h1>
+    <span><span class="live-dot"></span>Live</span>
+  </div>
+
+  <div class="card">
+    <% if (leaderboard.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-icon">🏆</div>
+        <p>Noch keine Teams</p>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Platz</th>
+              <th>Team</th>
+              <th>Punkte</th>
+              <th>Gelöst</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-tbody">
+            <% leaderboard.forEach(function(team, i) { %>
+              <tr>
+                <td>
+                  <% if (i === 0) { %><span class="rank-badge rank-1">🥇</span>
+                  <% } else if (i === 1) { %><span class="rank-badge rank-2">🥈</span>
+                  <% } else if (i === 2) { %><span class="rank-badge rank-3">🥉</span>
+                  <% } else { %><span class="rank-badge rank-other"><%= i+1 %></span><% } %>
+                </td>
+                <td class="font-bold"><%= team.name %></td>
+                <td class="font-bold"><%= team.total_points %></td>
+                <td><%= team.solved_count %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/footer') %>
